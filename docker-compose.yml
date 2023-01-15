@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  influxdb:
+    image: influxdb:2.6
+    container_name: tig_influxdb
+    networks:
+      - tig
+    ports:
+      - "8086:8086"
+    volumes:
+      # - $PWD/influxdb/data:/var/lib/influxdb2
+      # - $PWD/influxdb/config:/etc/influxdb2
+      - influxdb:/var/lib/influxdb2
+      - $PWD/influxdb/scripts:/docker-entrypoint-initdb.d
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: ${INFLUXDB_USERNAME}
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUXDB_PASSWORD}
+      DOCKER_INFLUXDB_INIT_ORG: ${INFLUXDB_ORG}
+      DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUXDB_BUCKET}
+      DOCKER_INFLUXDB_INIT_RETENTION: 1w
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUXDB_ADMIN_TOKEN}
+      V1_DB_NAME: ${INFLUXDB_V1_DB_NAME}
+      V1_RP_NAME: ${INFLUXDB_V1_RP_NAME}
+      V1_AUTH_USERNAME: ${INFLUXDB_V1_USERNAME}
+      V1_AUTH_PASSWORD: ${INFLUXDB_V1_PASSWORD}
+  telegraf:
+    image: telegraf:1.25
+    container_name: tig_telegraf
+    # user: telegraf:1000
+    user: telegraf:0
+    networks:
+      - tig
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $PWD/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    env_file:
+      - .env
+    depends_on:
+      - influxdb
+  grafana:
+    image: grafana/grafana:9.3.2
+    container_name: tig_grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - tig
+    volumes:
+      # - $PWD/grafana/data:/var/lib/grafana
+      - grafana:/var/lib/grafana
+      - $PWD/grafana/provisioning:/etc/grafana/provisioning
+    env_file:
+      - .env
+    depends_on:
+      - influxdb
+      - telegraf
+
+volumes:
+  influxdb:
+  grafana:
+
+
+networks:
+  tig:
