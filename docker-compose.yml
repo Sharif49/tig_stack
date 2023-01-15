@@ -19,7 +19,7 @@ services:
       DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUXDB_PASSWORD}
       DOCKER_INFLUXDB_INIT_ORG: ${INFLUXDB_ORG}
       DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUXDB_BUCKET}
-      DOCKER_INFLUXDB_INIT_RETENTION: 1w
+      DOCKER_INFLUXDB_INIT_RETENTION: ${INFLUXDB_INIT_RETENTION}
       DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUXDB_ADMIN_TOKEN}
       V1_DB_NAME: ${INFLUXDB_V1_DB_NAME}
       V1_RP_NAME: ${INFLUXDB_V1_RP_NAME}
@@ -29,7 +29,7 @@ services:
     image: telegraf:1.25
     container_name: tig_telegraf
     # user: telegraf:1000
-    user: telegraf:0
+    user: telegraf:1
     networks:
       - tig
     volumes:
